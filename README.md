@@ -62,6 +62,12 @@ go build -o gocrawl ./cmd/gocrawl
 
 # Отключить progress bar
 ./gocrawl -progress=false https://example.com
+
+# Включить подробное логирование (debug/info/error)
+./gocrawl -verbose -file urls.txt
+
+# Логирование только ошибок (по умолчанию)
+./gocrawl -progress=false -file urls.txt
 ```
 
 ### Переменные окружения
@@ -127,7 +133,7 @@ internal/
 
 Где:
 - `readable-part` — последний сегмент пути или имя хоста
-- `hash` — первые 8 символов SHA256 хэша полного URL
+- `hash` — первые 8 символов MD5 хэша полного URL
 - `ext` — расширение по Content-Type
 
 Примеры:
@@ -146,6 +152,37 @@ go test ./... -v
 # Запустить тесты с покрытием
 go test ./... -cover
 ```
+
+## Логирование
+
+Утилита поддерживает два режима логирования:
+
+### Обычный режим (по умолчанию)
+Выводятся только ошибки и итоговая статистика:
+```
+Statistics:
+  Success: 3
+  Failed:  1
+
+Error summary:
+  job 3 failed after 6 attempts: ...
+```
+
+### Подробный режим (-verbose)
+Выводится информация о каждом запросе, попытках retry и результатах:
+```
+Starting crawler with 5 workers, 5 retries, timeout=30s
+Parsed 4 URL(s)
+[DEBUG] Downloading https://example.com (attempt 1)
+[DEBUG] Retry attempt 2/6 for https://invalid.com (waiting 1s)
+[INFO] Downloaded https://example.com → downloads/example.html (200)
+[ERROR] All retries exhausted for https://invalid.com after 6 attempts
+```
+
+Уровни логирования:
+- `[DEBUG]` — отладочная информация (только с `-verbose`)
+- `[INFO]` — успешные операции (всегда)
+- `[ERROR]` — ошибки (всегда)
 
 ## Сборка и запуск
 
