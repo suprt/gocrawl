@@ -1,0 +1,40 @@
+package storage
+
+import (
+	"fmt"
+	"io"
+	"os"
+	fp "path/filepath"
+)
+
+type FileStorage struct {
+	outputDir string
+}
+
+func New(outputDir string) (*FileStorage, error) {
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return nil, fmt.Errorf("error creating output directory %s: %s", outputDir, err)
+	}
+	return &FileStorage{outputDir: outputDir}, nil
+}
+
+func (s *FileStorage) Save(r io.Reader, filename string) (string, error) {
+	filepath := fp.Join(s.outputDir, filename)
+
+	f, err := os.Create(filepath)
+	if err != nil {
+		return "", fmt.Errorf("error creating file %s: %s", filepath, err)
+	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			fmt.Printf("error closing file %s: %s", filepath, err)
+		}
+	}(f)
+
+	_, err = io.Copy(f, r)
+	if err != nil {
+		return "", fmt.Errorf("error saving file %s: %s", filepath, err)
+	}
+	return filepath, nil
+}
