@@ -60,6 +60,14 @@ func Load() (*Config, error) {
 		}
 	}
 
+	if envRateLimit := os.Getenv("GOCRAWL_RATELIMIT"); envRateLimit != "" {
+		if r, err := strconv.Atoi(envRateLimit); err == nil {
+			if r >= 0 {
+				*rateLimitMs = r
+			}
+		}
+	}
+
 	if *filePath == "" && len(urls) == 0 {
 		return nil, errors.New("no URLs provided: use -file or provide URLs as arguments")
 	}

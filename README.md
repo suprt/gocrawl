@@ -77,6 +77,7 @@ go build -o gocrawl ./cmd/gocrawl
 | `GOCRAWL_WORKERS` | Количество воркеров (переопределяет флаг) |
 | `GOCRAWL_TIMEOUT` | Таймаут в формате duration (переопределяет флаг) |
 | `GOCRAWL_RETRIES` | Количество повторных попыток (переопределяет флаг) |
+| `GOCRAWL_RATELIMIT` | Задержка между запросами в мс (переопределяет флаг) |
 
 ## Формат файла со списком URL
 
@@ -100,7 +101,7 @@ internal/
 ├── config/              # Загрузка конфигурации (CLI флаги + env)
 ├── crawler/             # Оркестрация воркеров, retry-логика
 ├── downloader/          # HTTP-клиент с декодированием кодировок
-├── naming/              # Генерация имён файлов (SHA256 + readable part)
+├── naming/              # Генерация имён файлов (MD5 + readable part)
 ├── parser/              # Парсинг и нормализация URL
 ├── progress/            # Progress bar
 └── storage/             # Сохранение файлов
@@ -187,9 +188,15 @@ Parsed 4 URL(s)
 ## Сборка и запуск
 
 ```bash
-# Сборка
+# Сборка (Linux/Mac)
 go build -o gocrawl ./cmd/gocrawl
 
-# Запуск
+# Сборка (Windows)
+go build -o gocrawl.exe ./cmd/gocrawl
+
+# Запуск (Linux/Mac)
 ./gocrawl -file test.txt -workers 5 -output ./test_downloads
+
+# Запуск (Windows)
+.\gocrawl.exe -file test.txt -workers 5 -output .\test_downloads
 ```
