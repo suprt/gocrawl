@@ -41,7 +41,7 @@ func New(cfg Config) *Client {
 		cfg.MaxRedirects = 10
 	}
 
-	return &Client{
+	c := &Client{
 		httpClient: &http.Client{
 			Timeout: cfg.Timeout,
 			Transport: &http.Transport{
@@ -59,6 +59,13 @@ func New(cfg Config) *Client {
 		userAgent:   cfg.UserAgent,
 		maxBodySize: cfg.MaxBodySize,
 	}
+
+	// Устанавливаем лимит размера тела по умолчанию (100 МБ), если не задан
+	if c.maxBodySize == 0 {
+		c.maxBodySize = 100 * 1024 * 1024 // 100 МБ
+	}
+
+	return c
 }
 
 func (c *Client) Download(ctx context.Context, url string) (io.ReadCloser, int, string, error) {
@@ -90,7 +97,8 @@ func (c *Client) Download(ctx context.Context, url string) (io.ReadCloser, int, 
 
 	buf := bufio.NewReader(resp.Body)
 	peek, err := buf.Peek(1024)
-	if err != nil && err != io.EOF {
+	if err != nil {
+		// io.EOF — нормальное состояние, если тело ответа короче 1024 байт
 		resp.Body.Close()
 		return nil, resp.StatusCode, "", fmt.Errorf("error peeking %s: %w", url, err)
 	}

@@ -34,7 +34,17 @@ func (s *FileStorage) Save(r io.Reader, filename string) (string, error) {
 
 	_, err = io.Copy(f, r)
 	if err != nil {
-		return "", fmt.Errorf("error saving file %s: %s", filepath, err)
+		// Закрываем файл при ошибке копирования
+		closeErr := f.Close()
+		if closeErr != nil {
+			return "", fmt.Errorf("error saving file %s: %w; also failed to close: %v", filepath, err, closeErr)
+		}
+		return "", fmt.Errorf("error saving file %s: %w", filepath, err)
+	}
+
+	// Явно закрываем файл после успешного копирования
+	if err := f.Close(); err != nil {
+		return "", fmt.Errorf("error closing file %s: %w", filepath, err)
 	}
 	return filepath, nil
 }

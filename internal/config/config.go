@@ -9,15 +9,16 @@ import (
 )
 
 type Config struct {
-	FilePath     string
-	URLs         []string
-	OutputDir    string
-	Workers      int
-	Timeout      time.Duration
-	MaxRetries   int
-	ShowProgress bool
-	RateLimitMs  int
-	Verbose      bool
+	FilePath      string
+	URLs          []string
+	OutputDir     string
+	Workers       int
+	Timeout       time.Duration
+	MaxRetries    int
+	ShowProgress  bool
+	RateLimitMs   int
+	Verbose       bool
+	MaxDuration   time.Duration // Максимальное время выполнения всего приложения
 }
 
 func Load() (*Config, error) {
@@ -68,6 +69,14 @@ func Load() (*Config, error) {
 		}
 	}
 
+	// Загружаем MaxDuration из переменной окружения
+	maxDuration := 10 * time.Minute // значение по умолчанию
+	if envMaxDuration := os.Getenv("GOCRAWL_MAX_DURATION"); envMaxDuration != "" {
+		if d, err := time.ParseDuration(envMaxDuration); err == nil {
+			maxDuration = d
+		}
+	}
+
 	if *filePath == "" && len(urls) == 0 {
 		return nil, errors.New("no URLs provided: use -file or provide URLs as arguments")
 	}
@@ -82,5 +91,6 @@ func Load() (*Config, error) {
 		ShowProgress: *showProgress,
 		RateLimitMs:  *rateLimitMs,
 		Verbose:      *verbose,
+		MaxDuration:  maxDuration,
 	}, nil
 }
