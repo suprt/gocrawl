@@ -27,11 +27,11 @@ func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results c
 			if c.config.RateLimitMs > 0 {
 				time.Sleep(time.Duration(c.config.RateLimitMs) * time.Millisecond)
 			}
-			
+
 			if c.config.Logger != nil {
 				c.config.Logger.Debug("Downloading %s (attempt %d)", job.URL, job.Retries+1)
 			}
-			
+
 			result, err := c.process(ctx, id, job)
 			if err != nil {
 				// Если есть ретраи — отправляем в retryJobs, иначе сразу в errors
@@ -156,12 +156,16 @@ func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, 
 			if attempts > 1 {
 				delay = time.Second * time.Duration(1<<uint(attempts-1))
 			}
-			
+
 			if c.config.Logger != nil {
 				c.config.Logger.Debug("Retry attempt %d/%d for %s (waiting %v)", attempts+1, c.config.MaxRetries+1, job.URL, delay)
 			}
-			
-			time.Sleep(delay)
+
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(delay):
+			}
 
 			result, err = c.process(ctx, -1, job)
 			if err == nil {
@@ -176,11 +180,11 @@ func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, 
 				}
 				break
 			}
-			
+
 			if c.config.Logger != nil {
 				c.config.Logger.Debug("Retry attempt %d failed for %s: %v", attempts+1, job.URL, err)
 			}
-			
+
 			attempts++
 		}
 

@@ -30,11 +30,11 @@ type ProgressBar interface {
 	Finish() error
 }
 type Config struct {
-	Workers      int
-	Timeout      time.Duration
-	MaxRetries   int
-	RateLimitMs  int // задержка между запросами в миллисекундах
-	Logger       Logger
+	Workers     int
+	Timeout     time.Duration
+	MaxRetries  int
+	RateLimitMs int // Задержка между запросами в миллисекундах
+	Logger      Logger
 }
 
 type Crawler struct {
@@ -93,10 +93,10 @@ func (c *Crawler) Run(ctx context.Context, urls []string, bar ProgressBar) ([]Wo
 	// Ожидаем завершения всех воркеров
 	wg.Wait()
 	close(retryJobs)
-	
+
 	// Ожидаем завершения retryWorker
 	retryWg.Wait()
-	
+
 	// Закрываем каналы результатов
 	close(results)
 	close(errors)

@@ -158,10 +158,13 @@ func WaitForSignal() context.Context {
 	ctx, cancel := context.WithCancel(context.Background())
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	// Обработка сигнала прерывания, при двойной отправке Ctrl+C - немедленный выход
 	go func() {
+		defer signal.Stop(sigCh)
 		<-sigCh
 		cancel()
-		signal.Stop(sigCh)
+		<-sigCh
+		os.Exit(1)
 	}()
 	return ctx
 }
