@@ -99,7 +99,7 @@ func (c *Client) Download(ctx context.Context, url string) (io.ReadCloser, int, 
 	peek, err := buf.Peek(1024)
 	if err != nil && err != io.EOF {
 		// io.EOF — нормальное состояние, если тело ответа короче 1024 байт
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, resp.StatusCode, "", fmt.Errorf("error peeking %s: %w", url, err)
 	}
 

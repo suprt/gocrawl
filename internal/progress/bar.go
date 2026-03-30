@@ -22,7 +22,7 @@ func New(max int, description string) *ProgBar {
 		progressbar.OptionShowCount(),
 		progressbar.OptionSetPredictTime(false),
 		progressbar.OptionOnCompletion(func() {
-			io.WriteString(os.Stdout, "\n")
+			_, _ = io.WriteString(os.Stdout, "\n")
 		}),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "=",

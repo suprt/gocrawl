@@ -71,7 +71,9 @@ func (c *Crawler) process(ctx context.Context, workerID int, job Job) (WorkerRes
 	if err != nil {
 		return WorkerResult{}, fmt.Errorf("downloading %s failed: %s", job.URL, err)
 	}
-	defer body.Close()
+	defer func() {
+		_ = body.Close()
+	}()
 
 	ext := getExtensionByContentType(contentType)
 	filename := c.namer.NameWithExtension(job.URL, ext)
