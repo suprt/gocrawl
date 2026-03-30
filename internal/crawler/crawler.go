@@ -69,7 +69,7 @@ func (c *Crawler) Run(ctx context.Context, urls []string, bar ProgressBar) ([]Wo
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
-			c.worker(ctx, workerID, jobs, results, errors, retryJobs)
+			c.worker(ctx, workerID, jobs, results, errors, retryJobs, bar)
 		}(i)
 	}
 
@@ -79,7 +79,7 @@ func (c *Crawler) Run(ctx context.Context, urls []string, bar ProgressBar) ([]Wo
 		retryWg.Add(1)
 		go func() {
 			defer retryWg.Done()
-			c.retryWorker(ctx, results, errors, retryJobs)
+			c.retryWorker(ctx, results, errors, retryJobs, bar)
 		}()
 	}
 
@@ -100,15 +100,9 @@ func (c *Crawler) Run(ctx context.Context, urls []string, bar ProgressBar) ([]Wo
 	// Собираем результаты
 	for result := range results {
 		allResults = append(allResults, result)
-		if bar != nil {
-			_ = bar.Add(1)
-		}
 	}
 	for err := range errors {
 		allErrors = append(allErrors, err)
-		if bar != nil {
-			_ = bar.Add(1)
-		}
 	}
 
 	return allResults, allErrors, nil

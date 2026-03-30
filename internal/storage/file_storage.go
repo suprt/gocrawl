@@ -25,12 +25,6 @@ func (s *FileStorage) Save(r io.Reader, filename string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error creating file %s: %s", filepath, err)
 	}
-	defer func(f *os.File) {
-		err := f.Close()
-		if err != nil {
-			fmt.Printf("error closing file %s: %s", filepath, err)
-		}
-	}(f)
 
 	_, err = io.Copy(f, r)
 	if err != nil {
@@ -42,7 +36,6 @@ func (s *FileStorage) Save(r io.Reader, filename string) (string, error) {
 		return "", fmt.Errorf("error saving file %s: %w", filepath, err)
 	}
 
-	// Явно закрываем файл после успешного копирования
 	if err := f.Close(); err != nil {
 		return "", fmt.Errorf("error closing file %s: %w", filepath, err)
 	}

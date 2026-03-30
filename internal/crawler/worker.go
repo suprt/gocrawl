@@ -14,7 +14,7 @@ type WorkerResult struct {
 	StatusCode int
 }
 
-func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results chan<- WorkerResult, errors chan<- error, retryJobs chan Job) {
+func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results chan<- WorkerResult, errors chan<- error, retryJobs chan Job, bar ProgressBar) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -44,6 +44,9 @@ func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results c
 						return
 					case errors <- fmt.Errorf("worker %d failed job %d after %d attempts: %w", id, job.Index, job.Retries+1, err):
 					}
+					if bar != nil {
+						_ = bar.Add(1)
+					}
 				}
 				continue
 			}
@@ -52,6 +55,9 @@ func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results c
 			case <-ctx.Done():
 				return
 			case results <- result:
+			}
+			if bar != nil {
+				_ = bar.Add(1)
 			}
 		}
 	}
@@ -126,7 +132,7 @@ func getExtensionByContentType(contentType string) string {
 	}
 }
 
-func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, errors chan<- error, retryJobs chan Job) {
+func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, errors chan<- error, retryJobs chan Job, bar ProgressBar) {
 	for job := range retryJobs {
 		var result WorkerResult
 		var err error
@@ -157,6 +163,9 @@ func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, 
 					return
 				case results <- result:
 				}
+				if bar != nil {
+					_ = bar.Add(1)
+				}
 				break
 			}
 
@@ -169,6 +178,9 @@ func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, 
 			case <-ctx.Done():
 				return
 			case errors <- fmt.Errorf("job %d failed after %d attempts: %w", job.Index, attempts, err):
+			}
+			if bar != nil {
+				_ = bar.Add(1)
 			}
 		}
 	}

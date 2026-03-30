@@ -20,6 +20,7 @@ func New(max int, description string) *ProgBar {
 		progressbar.OptionSetWidth(50),
 		progressbar.OptionThrottle(100*time.Millisecond),
 		progressbar.OptionShowCount(),
+		progressbar.OptionSetPredictTime(false),
 		progressbar.OptionOnCompletion(func() {
 			io.WriteString(os.Stdout, "\n")
 		}),

@@ -9,20 +9,20 @@ import (
 )
 
 type Config struct {
-	FilePath      string
-	URLs          []string
-	OutputDir     string
-	Workers       int
-	Timeout       time.Duration
-	MaxRetries    int
-	ShowProgress  bool
-	RateLimitMs   int
-	Verbose       bool
-	MaxDuration   time.Duration // Максимальное время выполнения всего приложения
+	FilePath     string
+	URLs         []string
+	OutputDir    string
+	Workers      int
+	Timeout      time.Duration
+	MaxRetries   int
+	ShowProgress bool
+	RateLimitMs  int
+	Verbose      bool
+	MaxDuration  time.Duration // Максимальное время выполнения всего приложения
 }
 
 func Load() (*Config, error) {
-	filePath := flag.String("file", "", "File with URLs (one per line)")
+	filePath := flag.String("input", "", "File with URLs (one per line)")
 	outputDir := flag.String("output", "./downloads", "Output directory")
 	workers := flag.Int("workers", 5, "Number of workers")
 	timeout := flag.Duration("timeout", 30*time.Second, "Timeout for each download")

@@ -34,3 +34,4 @@ go.work.sum
 # Test data
 test.txt
 test_downloads/
+downloads/
