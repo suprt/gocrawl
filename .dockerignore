@@ -1,0 +1,29 @@
+# Git
+.gitignore
+.git
+
+#IDE
+.idea/
+.vscode/
+*.iml
+
+#DOCS
+*.md
+
+#tests data and downloads
+data/
+test.txt
+test_downloads/
+downloads/
+
+#logs
+*.log
+
+#bins
+gocrawl.exe
+gocrawl
+
+#Docker
+Dockerfile
+.dockerignore
+
