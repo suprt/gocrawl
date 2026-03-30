@@ -1,10 +1,14 @@
-version: "1"
+version: "2"
 
 run:
   tests: true
 
+linters:
+  enable:
+    - errcheck
+
 issues:
-  exclude-rules:
-    -path: _test\.go$
-    linters:
-      - errcheck
+  exclude:
+    - linters:
+        - errcheck
+      path: _test\.go$
