@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="08f66f60-1e2a-4ce5-a497-f96c23462c83" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.golangci.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/crawler/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/crawler/worker.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/downloader/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/downloader/client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/progress/bar.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/progress/bar.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.golangci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.golangci.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
