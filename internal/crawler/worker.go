@@ -28,17 +28,10 @@ func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results c
 				time.Sleep(time.Duration(c.config.RateLimitMs) * time.Millisecond)
 			}
 
-			if c.config.Logger != nil {
-				c.config.Logger.Debug("Downloading %s (attempt %d)", job.URL, job.Retries+1)
-			}
-
 			result, err := c.process(ctx, id, job)
 			if err != nil {
 				// Если есть ретраи — отправляем в retryJobs, иначе сразу в errors
 				if job.Retries < c.config.MaxRetries {
-					if c.config.Logger != nil {
-						c.config.Logger.Debug("Retry scheduled for %s (attempt %d/%d): %v", job.URL, job.Retries+1, c.config.MaxRetries+1, err)
-					}
 					select {
 					case <-ctx.Done():
 						return
@@ -46,9 +39,6 @@ func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results c
 					}
 				} else {
 					// Ретраи исчерпаны или отключены — пишем ошибку
-					if c.config.Logger != nil {
-						c.config.Logger.Error("Failed %s after %d attempts: %v", job.URL, job.Retries+1, err)
-					}
 					select {
 					case <-ctx.Done():
 						return
@@ -56,10 +46,6 @@ func (c *Crawler) worker(ctx context.Context, id int, jobs <-chan Job, results c
 					}
 				}
 				continue
-			}
-
-			if c.config.Logger != nil {
-				c.config.Logger.Info("Downloaded %s → %s (%d)", job.URL, result.FilePath, result.StatusCode)
 			}
 
 			select {
@@ -157,10 +143,6 @@ func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, 
 				delay = time.Second * time.Duration(1<<uint(attempts-1))
 			}
 
-			if c.config.Logger != nil {
-				c.config.Logger.Debug("Retry attempt %d/%d for %s (waiting %v)", attempts+1, c.config.MaxRetries+1, job.URL, delay)
-			}
-
 			select {
 			case <-ctx.Done():
 				return
@@ -170,9 +152,6 @@ func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, 
 			result, err = c.process(ctx, -1, job)
 			if err == nil {
 				// Успех — отправляем результат
-				if c.config.Logger != nil {
-					c.config.Logger.Info("Retry succeeded for %s → %s", job.URL, result.FilePath)
-				}
 				select {
 				case <-ctx.Done():
 					return
@@ -181,18 +160,11 @@ func (c *Crawler) retryWorker(ctx context.Context, results chan<- WorkerResult, 
 				break
 			}
 
-			if c.config.Logger != nil {
-				c.config.Logger.Debug("Retry attempt %d failed for %s: %v", attempts+1, job.URL, err)
-			}
-
 			attempts++
 		}
 
 		// Если ошибка и все попытки исчерпаны — пишем ошибку
 		if err != nil {
-			if c.config.Logger != nil {
-				c.config.Logger.Error("All retries exhausted for %s after %d attempts", job.URL, attempts)
-			}
 			select {
 			case <-ctx.Done():
 				return

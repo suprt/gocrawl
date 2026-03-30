@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"os"
 
 	"github.com/suprt/gocrawl/internal/bootstrap"
 )
@@ -11,13 +12,12 @@ func main() {
 
 	app, err := bootstrap.New()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
 	}
 
-	// Создаём контекст с обработкой сигналов
 	ctx := bootstrap.WaitForSignal()
 
-	// Оборачиваем в таймаут, если задан
 	if app.Config.MaxDuration > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, app.Config.MaxDuration)
@@ -25,7 +25,8 @@ func main() {
 	}
 
 	if err := app.Run(ctx); err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
 	}
 
 }

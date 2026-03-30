@@ -19,12 +19,6 @@ type Namer interface {
 	NameWithExtension(rawURL string, ext string) string
 }
 
-type Logger interface {
-	Debug(format string, args ...interface{})
-	Info(format string, args ...interface{})
-	Error(format string, args ...interface{})
-}
-
 type ProgressBar interface {
 	Add(n int) error
 	Finish() error
@@ -34,7 +28,6 @@ type Config struct {
 	Timeout     time.Duration
 	MaxRetries  int
 	RateLimitMs int // Задержка между запросами в миллисекундах
-	Logger      Logger
 }
 
 type Crawler struct {

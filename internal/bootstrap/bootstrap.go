@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"io"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,31 +11,22 @@ import (
 	"github.com/suprt/gocrawl/internal/config"
 	"github.com/suprt/gocrawl/internal/crawler"
 	"github.com/suprt/gocrawl/internal/downloader"
+	"github.com/suprt/gocrawl/internal/logger"
 	"github.com/suprt/gocrawl/internal/naming"
 	"github.com/suprt/gocrawl/internal/parser"
 	"github.com/suprt/gocrawl/internal/progress"
 	"github.com/suprt/gocrawl/internal/storage"
 )
 
-// simpleLogger реализует интерфейс crawler.Logger
-type simpleLogger struct {
-	verbose bool
-	out     io.Writer
-	errOut  io.Writer
-}
-
-func (l *simpleLogger) Debug(format string, args ...interface{}) {
-	if l.verbose {
-		fmt.Fprintf(l.out, "[DEBUG] "+format+"\n", args...)
-	}
-}
-
-func (l *simpleLogger) Info(format string, args ...interface{}) {
-	fmt.Fprintf(l.out, "[INFO] "+format+"\n", args...)
-}
-
-func (l *simpleLogger) Error(format string, args ...interface{}) {
-	fmt.Fprintf(l.errOut, "[ERROR] "+format+"\n", args...)
+type Logger interface {
+	Debug(msg string, args ...any)
+	Info(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
+	DebugContext(ctx context.Context, msg string, args ...any)
+	InfoContext(ctx context.Context, msg string, args ...any)
+	WarnContext(ctx context.Context, msg string, args ...any)
+	ErrorContext(ctx context.Context, msg string, args ...any)
 }
 
 type App struct {
@@ -44,6 +35,7 @@ type App struct {
 	Parser     *parser.Parser
 	Progress   crawler.ProgressBar
 	CancelFunc context.CancelFunc
+	Logger     Logger
 }
 
 func New() (*App, error) {
@@ -51,6 +43,16 @@ func New() (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
+
+	logLevel := slog.LevelInfo
+	if cfg.Verbose {
+		logLevel = slog.LevelDebug
+	}
+	log := logger.New(logger.Config{
+		Level:  logLevel,
+		Format: "text",
+		Output: os.Stderr,
+	})
 
 	storageClient, err := storage.New(cfg.OutputDir)
 	if err != nil {
@@ -66,20 +68,12 @@ func New() (*App, error) {
 
 	parserClient := parser.New(nil)
 
-	// Создаём логгер
-	logger := &simpleLogger{
-		verbose: cfg.Verbose,
-		out:     os.Stdout,
-		errOut:  os.Stderr,
-	}
-
 	crawlerClient := crawler.New(
 		downloaderClient, storageClient, namerClient, crawler.Config{
 			Workers:     cfg.Workers,
 			Timeout:     cfg.Timeout,
 			MaxRetries:  cfg.MaxRetries,
 			RateLimitMs: cfg.RateLimitMs,
-			Logger:      logger,
 		},
 	)
 
@@ -94,14 +88,15 @@ func New() (*App, error) {
 		Crawler:  crawlerClient,
 		Parser:   parserClient,
 		Progress: bar,
+		Logger:   log,
 	}, nil
 }
 
 func (a *App) Run(ctx context.Context) error {
-	if a.Config.Verbose {
-		fmt.Printf("Starting crawler with %d workers, %d retries, timeout=%v\n",
-			a.Config.Workers, a.Config.MaxRetries, a.Config.Timeout)
-	}
+	a.Logger.Info("starting crawler",
+		"workers", a.Config.Workers,
+		"retries", a.Config.MaxRetries,
+		"timeout", a.Config.Timeout.String())
 
 	urls, err := a.Parser.Parse(parser.Config{
 		FilePath:    a.Config.FilePath,
@@ -111,11 +106,8 @@ func (a *App) Run(ctx context.Context) error {
 	})
 
 	if err != nil {
+		a.Logger.Error("failed to parse URLs", "error", err)
 		return fmt.Errorf("failed to parse URLs: %w", err)
-	}
-
-	if a.Config.Verbose {
-		fmt.Printf("Parsed %d URL(s)\n", len(urls))
 	}
 
 	// Инициализируем progress bar с правильным количеством URL только если показан прогресс
@@ -127,6 +119,7 @@ func (a *App) Run(ctx context.Context) error {
 	}
 	results, errors, err := a.Crawler.Run(ctx, urls, a.Progress)
 	if err != nil {
+		a.Logger.Error("Crawler failed", "error", err)
 		return fmt.Errorf("failed to crawl: %w", err)
 	}
 
@@ -137,19 +130,18 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) printStats(results []crawler.WorkerResult, errors []error) {
-	fmt.Printf("\nStatistics:\n")
-	fmt.Printf("  Success: %d\n", len(results))
-	fmt.Printf("  Failed:  %d\n", len(errors))
+	a.Logger.Info("Crawler finished",
+		"success", len(results),
+		"failed", len(errors))
 
 	if len(errors) > 0 {
 		errorCount := make(map[string]int)
 		for _, err := range errors {
 			errorCount[err.Error()]++
 		}
-
-		fmt.Printf("\nError summary:\n")
 		for errMsg, count := range errorCount {
-			fmt.Printf("  %s: %d\n", errMsg, count)
+
+			a.Logger.Error("Job failed", "error", errMsg, "count", count)
 		}
 	}
 }
