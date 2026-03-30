@@ -109,6 +109,10 @@ func (a *App) Run(ctx context.Context) error {
 		a.Logger.Error("failed to parse URLs", "error", err)
 		return fmt.Errorf("failed to parse URLs: %w", err)
 	}
+	a.Logger.Debug("parsed URLs", "count", len(urls))
+	for i, url := range urls {
+		a.Logger.Debug("URL", "index", i, "url", url)
+	}
 
 	// Инициализируем progress bar с правильным количеством URL только если показан прогресс
 	if a.Config.ShowProgress {
@@ -121,6 +125,17 @@ func (a *App) Run(ctx context.Context) error {
 	if err != nil {
 		a.Logger.Error("Crawler failed", "error", err)
 		return fmt.Errorf("failed to crawl: %w", err)
+	}
+
+	for _, result := range results {
+		a.Logger.Debug("Downloaded",
+			"url", result.Job.URL,
+			"path", result.FilePath,
+			"status", result.StatusCode,
+			"duration", result.Duration.String())
+	}
+	for _, err := range errors {
+		a.Logger.Debug("Download failed", "error", err)
 	}
 
 	a.printStats(results, errors)
