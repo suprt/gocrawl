@@ -24,7 +24,7 @@ type Config struct {
 func Load() (*Config, error) {
 	filePath := flag.String("input", "", "File with URLs (one per line)")
 	outputDir := flag.String("output", "./downloads", "Output directory")
-	workers := flag.Int("workers", 5, "Number of workers")
+	workers := flag.Int("workers", 10, "Number of workers")
 	timeout := flag.Duration("timeout", 30*time.Second, "Timeout for each download")
 	maxRetries := flag.Int("retries", 5, "Maximum number of retries for failed downloads")
 	showProgress := flag.Bool("progress", true, "Show progress bar")
