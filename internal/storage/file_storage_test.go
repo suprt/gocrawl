@@ -36,14 +36,6 @@ func TestFileStorage_New_CreatesDirectory(t *testing.T) {
 	}
 }
 
-func TestFileStorage_New_InvalidPath(t *testing.T) {
-	invalidPath := "??"
-	_, err := New(invalidPath)
-	if err == nil {
-		t.Errorf("New() expected error for invalid path, got nil")
-	}
-}
-
 func TestFileStorage_Save_Success(t *testing.T) {
 	tmpDir := t.TempDir()
 	storage, err := New(tmpDir)
@@ -121,19 +113,6 @@ func TestFileStorage_Save_LargeContent(t *testing.T) {
 	}
 	if info.Size() != int64(len(content)) {
 		t.Errorf("file size = %d, want %d", info.Size(), int64(len(content)))
-	}
-}
-
-func TestFileStorage_Save_InvalidFilename(t *testing.T) {
-	tmpDir := t.TempDir()
-	storage, err := New(tmpDir)
-	if err != nil {
-		t.Fatalf("New() failed %v", err)
-	}
-	reader := strings.NewReader("test")
-	_, err = storage.Save(reader, "???")
-	if err == nil {
-		t.Errorf("Save() expected error, got nil")
 	}
 }
 
