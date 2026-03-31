@@ -300,4 +300,4 @@ time=2026-03-30T09:00:00Z level=DEBUG msg="Parsed URLs" count=4
 time=2026-03-30T09:00:00Z level=DEBUG msg="URL" index=0 url="https://example.com"
 time=2026-03-30T09:00:01Z level=DEBUG msg="Downloaded" url="https://example.com" path="downloads/example.html" status=200
 ```
-```
+
