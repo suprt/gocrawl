@@ -22,7 +22,7 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	filePath := flag.String("input", "", "File with URLs (one per line)")
+	filePath := flag.String("file", "", "File with URLs (one per line)")
 	outputDir := flag.String("output", "./downloads", "Output directory")
 	workers := flag.Int("workers", 10, "Number of workers")
 	timeout := flag.Duration("timeout", 30*time.Second, "Timeout for each download")

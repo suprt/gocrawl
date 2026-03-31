@@ -30,12 +30,11 @@ type Logger interface {
 }
 
 type App struct {
-	Config     *config.Config
-	Crawler    *crawler.Crawler
-	Parser     *parser.Parser
-	Progress   crawler.ProgressBar
-	CancelFunc context.CancelFunc
-	Logger     Logger
+	Config   *config.Config
+	Crawler  *crawler.Crawler
+	Parser   *parser.Parser
+	Progress crawler.ProgressBar
+	Logger   Logger
 }
 
 func New() (*App, error) {
@@ -77,11 +76,7 @@ func New() (*App, error) {
 		},
 	)
 
-	// Progress bar создаётся только один раз в Run(), здесь только сохраняем флаг
 	var bar crawler.ProgressBar
-	if cfg.ShowProgress {
-		bar = &progress.NoopBar{} // заглушка, будет заменена в Run()
-	}
 
 	return &App{
 		Config:   cfg,
