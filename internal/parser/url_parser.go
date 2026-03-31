@@ -117,6 +117,11 @@ func (p *Parser) normalizeAll(rawURLs []string, skipInvalid bool) ([]string, err
 }
 
 func (p *Parser) normalize(rawURL string) (string, error) {
+	if strings.HasPrefix(rawURL, "javascript:") ||
+		strings.HasPrefix(rawURL, "data:") ||
+		strings.HasPrefix(rawURL, "file:") {
+		return "", fmt.Errorf("invalid URL scheme")
+	}
 
 	if !strings.HasPrefix(rawURL, "http://") && !strings.HasPrefix(rawURL, "https://") {
 		rawURL = "https://" + rawURL

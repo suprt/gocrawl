@@ -180,9 +180,13 @@ func TestClient_Download_ContentTypes(t *testing.T) {
 
 func TestNew_Defaults(t *testing.T) {
 	client := New(Config{})
-
-	if client.userAgent != "GoCrawl/1.0" {
-		t.Errorf("New() userAgent = %q, want %q", client.userAgent, "GoCrawl/1.0")
+	var userAgent = []string{
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+	}
+	if client.userAgent != userAgent[0] && client.userAgent != userAgent[1] && client.userAgent != userAgent[2] {
+		t.Errorf("New() userAgent = %q, want %q", client.userAgent, userAgent)
 	}
 	if client.httpClient.Timeout != 30*time.Second {
 		t.Errorf("New() timeout = %v, want %v", client.httpClient.Timeout, 30*time.Second)
