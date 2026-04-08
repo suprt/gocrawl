@@ -13,12 +13,12 @@ import (
 
 // MockDownloader для тестов
 type MockDownloader struct {
-	ResponseBody   string
-	StatusCode     int
-	ContentType    string
-	Err            error
-	CallCount      int32
-	DownloadFunc   func(ctx context.Context, url string) (io.ReadCloser, int, string, error)
+	ResponseBody string
+	StatusCode   int
+	ContentType  string
+	Err          error
+	CallCount    int32
+	DownloadFunc func(ctx context.Context, url string) (io.ReadCloser, int, string, error)
 }
 
 func (m *MockDownloader) Download(ctx context.Context, url string) (io.ReadCloser, int, string, error) {
@@ -304,7 +304,7 @@ func TestGetExtensionByContentType(t *testing.T) {
 
 func TestJob_WithRetry(t *testing.T) {
 	job := NewJob("https://example.com", 0)
-	
+
 	if job.Retries != 0 {
 		t.Errorf("NewJob() Retries = %d, want 0", job.Retries)
 	}

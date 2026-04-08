@@ -1,6 +1,10 @@
 # GoCrawl
 
+
+![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go)
+![License](https://img.shields.io/badge/License-MIT-green)
 [![Tests](https://github.com/suprt/gocrawl/actions/workflows/test.yml/badge.svg)](https://github.com/suprt/gocrawl/actions/workflows/test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/suprt/gocrawl)](https://goreportcard.com/report/github.com/suprt/gocrawl)
 
 CLI-утилита для **параллельного скачивания веб-страниц** по списку URL с настраиваемым уровнем параллелизма, retry-логикой и прогресс-баром.
 
@@ -301,3 +305,7 @@ time=2026-03-30T09:00:00Z level=DEBUG msg="URL" index=0 url="https://example.com
 time=2026-03-30T09:00:01Z level=DEBUG msg="Downloaded" url="https://example.com" path="downloads/example.html" status=200
 ```
 
+## 📜 Лицензия
+
+Этот проект распространяется под лицензией **MIT**.
+См. файл [LICENSE](LICENSE) для подробностей.

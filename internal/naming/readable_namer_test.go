@@ -144,7 +144,7 @@ func TestReadableNamer_getReadablePart(t *testing.T) {
 
 func Test_sanitize(t *testing.T) {
 	tests := []struct {
-		name string
+		name  string
 		input string
 		want  string
 	}{
@@ -187,20 +187,20 @@ func Test_sanitize(t *testing.T) {
 
 func TestReadableNamer_SHA256_hash(t *testing.T) {
 	namer := NewReadableNamer(50)
-	
+
 	// Один и тот же URL должен давать одинаковый хэш
 	url := "https://example.com"
 	name1 := namer.Name(url)
 	name2 := namer.Name(url)
-	
+
 	if name1 != name2 {
 		t.Errorf("Name() produced different hashes for same URL: %q vs %q", name1, name2)
 	}
-	
+
 	// Разные URL должны давать разные хэши
 	url2 := "https://example.org"
 	name3 := namer.Name(url2)
-	
+
 	if name1 == name3 {
 		t.Errorf("Name() produced same hash for different URLs")
 	}
