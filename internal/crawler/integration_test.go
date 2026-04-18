@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -19,12 +20,13 @@ func TestCrawler_Integration_RealHTTP(t *testing.T) {
 		t.Skip("Skipping integration test in short mode")
 	}
 
-	requestCount := 0
+	var requestCount int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestCount++
+		atomic.AddInt32(&requestCount, 1)
+		count := atomic.LoadInt32(&requestCount)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("<html><body>Test page " + string(rune(requestCount)) + "</body></html>"))
+		_, _ = w.Write([]byte("<html><body>Test page " + string(rune(count)) + "</body></html>"))
 	}))
 	defer server.Close()
 
@@ -70,7 +72,7 @@ func TestCrawler_Integration_RealHTTP(t *testing.T) {
 	}
 
 	if requestCount != 3 {
-		t.Errorf("Expected 3 requests to server, got %d", requestCount)
+		t.Errorf("Expected 3 requests to server, got %d", atomic.LoadInt32(&requestCount))
 	}
 
 	files, err := os.ReadDir(tmpDir)
@@ -99,11 +101,12 @@ func TestCrawler_Integration_WithRetry(t *testing.T) {
 		t.Skip("Skipping integration test in short mode")
 	}
 
-	attemptCount := 0
+	var attemptCount int32
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		attemptCount++
-		if attemptCount == 1 {
+		atomic.AddInt32(&attemptCount, 1)
+		count := atomic.LoadInt32(&attemptCount)
+		if count == 1 {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -144,7 +147,7 @@ func TestCrawler_Integration_WithRetry(t *testing.T) {
 	}
 
 	if attemptCount != 2 {
-		t.Errorf("Expected 2 attempts (1 fail + 1 success), got %d", attemptCount)
+		t.Errorf("Expected 2 attempts (1 fail + 1 success), got %d", atomic.LoadInt32(&attemptCount))
 	}
 }
 
